@@ -22,8 +22,8 @@ export type EllipseShape = ShapeBase & {
   type: "ellipse";
   x: number;
   y: number;
-  radiusX: number;
-  radiusY: number;
+  width: number;
+  height: number;
 };
 
 export type RectangleShape = ShapeBase & {

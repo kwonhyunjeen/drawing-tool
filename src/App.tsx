@@ -1,7 +1,13 @@
-import { Layer, Line, Stage } from "react-konva";
+import { Ellipse, Layer, Line, Stage } from "react-konva";
 import Konva from "konva";
 import { useState } from "react";
-import type { Tool, Shape, BrushShape, LineShape } from "./types/drawing";
+import type {
+  Tool,
+  Shape,
+  BrushShape,
+  LineShape,
+  EllipseShape,
+} from "./types/drawing";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "./components/Button";
 import { nonNullable } from "./utils/nonNullable";
@@ -40,6 +46,19 @@ function App() {
       };
       setDraftShape(newShape);
     }
+    if (tool === "ellipse") {
+      const newShape: EllipseShape = {
+        id,
+        type: "ellipse",
+        x: point.x,
+        y: point.y,
+        width: 0,
+        height: 0,
+        stroke: "#00dd00",
+        strokeWidth: 5,
+      };
+      setDraftShape(newShape);
+    }
   };
 
   const handleMouseMove = (event: Konva.KonvaEventObject<MouseEvent>) => {
@@ -61,6 +80,13 @@ function App() {
           ...currentShape,
           endPoint: [point.x, point.y],
         } satisfies LineShape;
+      }
+      if (currentShape?.type === "ellipse") {
+        return {
+          ...currentShape,
+          width: point.x - currentShape.x,
+          height: point.y - currentShape.y,
+        } satisfies EllipseShape;
       }
       return currentShape;
     });
@@ -129,6 +155,23 @@ function App() {
                     <Line
                       key={shape.id}
                       points={[...shape.startPoint, ...shape.endPoint]}
+                      stroke={shape.stroke}
+                      strokeWidth={shape.strokeWidth}
+                    />
+                  );
+                }
+                if (shape.type === "ellipse") {
+                  const radiusX = shape.width / 2;
+                  const radiusY = shape.height / 2;
+                  return (
+                    <Ellipse
+                      key={shape.id}
+                      x={shape.x}
+                      y={shape.y}
+                      radiusX={Math.abs(radiusX)}
+                      radiusY={Math.abs(radiusY)}
+                      offsetX={-radiusX}
+                      offsetY={-radiusY}
                       stroke={shape.stroke}
                       strokeWidth={shape.strokeWidth}
                     />
