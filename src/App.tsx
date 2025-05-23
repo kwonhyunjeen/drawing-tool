@@ -1,7 +1,7 @@
 import { Layer, Line, Stage } from "react-konva";
 import Konva from "konva";
 import { useState } from "react";
-import type { Tool, Shape, BrushShape } from "./types/drawing";
+import type { Tool, Shape, BrushShape, LineShape } from "./types/drawing";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "./components/Button";
 import { nonNullable } from "./utils/nonNullable";
@@ -29,6 +29,17 @@ function App() {
       };
       setDraftShape(newShape);
     }
+    if (tool === "line") {
+      const newShape: LineShape = {
+        id,
+        type: "line",
+        startPoint: [point.x, point.y],
+        endPoint: [point.x, point.y],
+        stroke: "#dddd00",
+        strokeWidth: 5,
+      };
+      setDraftShape(newShape);
+    }
   };
 
   const handleMouseMove = (event: Konva.KonvaEventObject<MouseEvent>) => {
@@ -44,6 +55,12 @@ function App() {
           ...currentShape,
           points: [...currentShape.points, [point.x, point.y]],
         } satisfies BrushShape;
+      }
+      if (currentShape?.type === "line") {
+        return {
+          ...currentShape,
+          endPoint: [point.x, point.y],
+        } satisfies LineShape;
       }
       return currentShape;
     });
@@ -102,6 +119,16 @@ function App() {
                     <Line
                       key={shape.id}
                       points={shape.points.flat()}
+                      stroke={shape.stroke}
+                      strokeWidth={shape.strokeWidth}
+                    />
+                  );
+                }
+                if (shape.type === "line") {
+                  return (
+                    <Line
+                      key={shape.id}
+                      points={[...shape.startPoint, ...shape.endPoint]}
                       stroke={shape.stroke}
                       strokeWidth={shape.strokeWidth}
                     />

@@ -14,7 +14,8 @@ export type BrushShape = ShapeBase & {
 
 export type LineShape = ShapeBase & {
   type: "line";
-  points: number[];
+  startPoint: [x: number, y: number];
+  endPoint: [x: number, y: number];
 };
 
 export type EllipseShape = ShapeBase & {
