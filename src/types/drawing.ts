@@ -9,7 +9,7 @@ export type ShapeBase = {
 
 export type BrushShape = ShapeBase & {
   type: "brush";
-  points: number[];
+  points: [x: number, y: number][];
 };
 
 export type LineShape = ShapeBase & {
