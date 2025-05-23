@@ -1,4 +1,4 @@
-import { Ellipse, Layer, Line, Stage } from "react-konva";
+import { Ellipse, Layer, Line, Rect, Stage } from "react-konva";
 import Konva from "konva";
 import { useState } from "react";
 import type {
@@ -7,6 +7,7 @@ import type {
   BrushShape,
   LineShape,
   EllipseShape,
+  RectangleShape,
 } from "./types/drawing";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "./components/Button";
@@ -59,6 +60,19 @@ function App() {
       };
       setDraftShape(newShape);
     }
+    if (tool === "rectangle") {
+      const newShape: RectangleShape = {
+        id,
+        type: "rectangle",
+        x: point.x,
+        y: point.y,
+        width: 0,
+        height: 0,
+        stroke: "#0000dd",
+        strokeWidth: 5,
+      };
+      setDraftShape(newShape);
+    }
   };
 
   const handleMouseMove = (event: Konva.KonvaEventObject<MouseEvent>) => {
@@ -87,6 +101,13 @@ function App() {
           width: point.x - currentShape.x,
           height: point.y - currentShape.y,
         } satisfies EllipseShape;
+      }
+      if (currentShape?.type === "rectangle") {
+        return {
+          ...currentShape,
+          width: point.x - currentShape.x,
+          height: point.y - currentShape.y,
+        } satisfies RectangleShape;
       }
       return currentShape;
     });
@@ -172,6 +193,19 @@ function App() {
                       radiusY={Math.abs(radiusY)}
                       offsetX={-radiusX}
                       offsetY={-radiusY}
+                      stroke={shape.stroke}
+                      strokeWidth={shape.strokeWidth}
+                    />
+                  );
+                }
+                if (shape.type === "rectangle") {
+                  return (
+                    <Rect
+                      key={shape.id}
+                      x={shape.x}
+                      y={shape.y}
+                      width={shape.width}
+                      height={shape.height}
                       stroke={shape.stroke}
                       strokeWidth={shape.strokeWidth}
                     />
