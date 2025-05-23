@@ -1,61 +1,64 @@
 import { Layer, Line, Stage } from "react-konva";
 import Konva from "konva";
 import { useState } from "react";
-import type { Tool, Shape } from "./types/drawing";
+import type { Tool, Shape, BrushShape } from "./types/drawing";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "./components/Button";
+import { nonNullable } from "./utils/nonNullable";
 
 function App() {
   const [tool, setTool] = useState<Tool>("brush");
   const [shapes, setShapes] = useState<Shape[]>([]);
-  const [isDrawing, setIsDrawing] = useState(false);
+  const [draftShape, setDraftShape] = useState<Shape>();
 
   const handleMouseDown = (event: Konva.KonvaEventObject<MouseEvent>) => {
-    setIsDrawing(true);
+    const id = uuidv4();
     const stage = event.target.getStage();
     const point = stage?.getPointerPosition();
 
+    console.log("MouseDown", id, point);
     if (!point) return;
 
-    console.log("처음 좌표:", point);
-
     if (tool === "brush") {
-      const newBrush: Shape = {
-        id: uuidv4(),
+      const newShape: BrushShape = {
+        id,
         type: "brush",
         points: [[point.x, point.y]],
         stroke: "#dd0000",
         strokeWidth: 5,
       };
-      setShapes([...shapes, newBrush]);
+      setDraftShape(newShape);
     }
   };
 
   const handleMouseMove = (event: Konva.KonvaEventObject<MouseEvent>) => {
-    if (!isDrawing) return;
     const stage = event.target.getStage();
     const point = stage?.getPointerPosition();
 
+    // console.log("MouseMove", point);
     if (!point) return;
 
-    setShapes((previous) => {
-      const lastIndex = previous.length - 1;
-      const last = previous[lastIndex];
-
-      if (!last || last.type !== "brush") return previous;
-
-      const updatedBrush: Shape = {
-        ...last,
-        points: [...last.points, [point.x, point.y]],
-      };
-
-      return [...previous.slice(0, lastIndex), updatedBrush];
+    setDraftShape((currentShape) => {
+      if (currentShape?.type === "brush") {
+        return {
+          ...currentShape,
+          points: [...currentShape.points, [point.x, point.y]],
+        } satisfies BrushShape;
+      }
+      return currentShape;
     });
-    console.log({ shapes });
   };
 
   const handleMouseUp = () => {
-    setIsDrawing(false);
+    if (!draftShape) {
+      console.log("MouseUp", shapes);
+      return;
+    }
+
+    const newShapes = [...shapes, draftShape];
+    console.log("MouseUp", newShapes);
+    setDraftShape(undefined);
+    return setShapes(newShapes);
   };
 
   return (
@@ -91,18 +94,20 @@ function App() {
           onMouseUp={handleMouseUp}
         >
           <Layer>
-            {shapes.map((shape) => {
-              if (shape.type === "brush") {
-                return (
-                  <Line
-                    key={shape.id}
-                    points={shape.points.flat()}
-                    stroke={shape.stroke}
-                    strokeWidth={shape.strokeWidth}
-                  />
-                );
-              }
-            })}
+            {[...shapes, draftShape]
+              .filter((shape) => nonNullable(shape))
+              .map((shape) => {
+                if (shape.type === "brush") {
+                  return (
+                    <Line
+                      key={shape.id}
+                      points={shape.points.flat()}
+                      stroke={shape.stroke}
+                      strokeWidth={shape.strokeWidth}
+                    />
+                  );
+                }
+              })}
           </Layer>
         </Stage>
       </div>
