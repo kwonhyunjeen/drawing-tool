@@ -1,0 +1,14 @@
+# Install them to the this project: `pnpm lefthook install`
+
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      run: pnpm prettier --write {staged_files} && git add {staged_files}
+      glob: "*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,md,mdx,html,css,sass,scss,less,json,yml,yaml}"
+
+pre-push:
+  parallel: true
+  commands:
+    lint:
+      run: pnpm lint
