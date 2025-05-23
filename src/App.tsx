@@ -1,4 +1,4 @@
-import { Ellipse, Layer, Line, Rect, Stage } from "react-konva";
+import { Ellipse, Group, Layer, Line, Rect, Stage } from "react-konva";
 import Konva from "konva";
 import { useState } from "react";
 import type {
@@ -8,10 +8,13 @@ import type {
   LineShape,
   EllipseShape,
   RectangleShape,
+  PolygonShape,
 } from "./types/drawing";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "./components/Button";
 import { nonNullable } from "./utils/nonNullable";
+
+const CLOSE_DISTANCE_THRESHOLD = 8; // px
 
 function App() {
   const [tool, setTool] = useState<Tool>("brush");
@@ -73,6 +76,38 @@ function App() {
       };
       setDraftShape(newShape);
     }
+    if (tool === "polygon") {
+      const newLine = [point.x, point.y, point.x, point.y] as const;
+      setDraftShape((currentShape) => {
+        if (currentShape?.type === "polygon") {
+          const firstLine = currentShape.lines.at(0);
+          const lastLine = currentShape.lines.at(-1);
+          if (!firstLine || !lastLine) {
+            throw new Error("No first or last line");
+          }
+          const [firstStartX, firstStartY] = firstLine;
+          const [, , lastEndX, lastEndY] = lastLine;
+          if (
+            Math.abs(firstStartX - lastEndX) <= CLOSE_DISTANCE_THRESHOLD &&
+            Math.abs(firstStartY - lastEndY) <= CLOSE_DISTANCE_THRESHOLD
+          ) {
+            return currentShape;
+          }
+          return {
+            ...currentShape,
+            lines: [...currentShape.lines, newLine],
+          } satisfies PolygonShape;
+        }
+        const newShape: PolygonShape = {
+          id,
+          type: "polygon",
+          lines: [newLine],
+          stroke: "#dd00dd",
+          strokeWidth: 5,
+        };
+        return newShape;
+      });
+    }
   };
 
   const handleMouseMove = (event: Konva.KonvaEventObject<MouseEvent>) => {
@@ -109,6 +144,20 @@ function App() {
           height: point.y - currentShape.y,
         } satisfies RectangleShape;
       }
+      if (currentShape?.type === "polygon") {
+        const lastLine = currentShape.lines.at(-1);
+        if (!lastLine) {
+          throw new Error("No last line");
+        }
+        const newLines = [
+          ...currentShape.lines.slice(0, -1),
+          [lastLine[0], lastLine[1], point.x, point.y] as const,
+        ];
+        return {
+          ...currentShape,
+          lines: newLines,
+        } satisfies PolygonShape;
+      }
       return currentShape;
     });
   };
@@ -119,7 +168,35 @@ function App() {
       return;
     }
 
-    const newShapes = [...shapes, draftShape];
+    let saveShape = draftShape;
+
+    if (saveShape.type === "polygon") {
+      if (saveShape.lines.length < 3) {
+        return;
+      }
+      const firstLine = saveShape.lines.at(0);
+      const lastLine = saveShape.lines.at(-1);
+      if (!firstLine || !lastLine) {
+        throw new Error("No first or last line");
+      }
+      const [firstStartX, firstStartY] = firstLine;
+      const [lastStartX, lastStartY, lastEndX, lastEndY] = lastLine;
+      if (
+        Math.abs(firstStartX - lastEndX) > CLOSE_DISTANCE_THRESHOLD ||
+        Math.abs(firstStartY - lastEndY) > CLOSE_DISTANCE_THRESHOLD
+      ) {
+        return;
+      }
+      saveShape = {
+        ...saveShape,
+        lines: [
+          ...saveShape.lines.slice(0, -1),
+          [lastStartX, lastStartY, firstStartX, firstStartY] as const,
+        ],
+      } satisfies PolygonShape;
+    }
+
+    const newShapes = [...shapes, saveShape];
     console.log("MouseUp", newShapes);
     setDraftShape(undefined);
     return setShapes(newShapes);
@@ -209,6 +286,20 @@ function App() {
                       stroke={shape.stroke}
                       strokeWidth={shape.strokeWidth}
                     />
+                  );
+                }
+                if (shape.type === "polygon") {
+                  return (
+                    <Group key={shape.id}>
+                      {shape.lines.map((line, index) => (
+                        <Line
+                          key={`${shape.id}-${index}`}
+                          points={[...line]}
+                          stroke={shape.stroke}
+                          strokeWidth={shape.strokeWidth}
+                        />
+                      ))}
+                    </Group>
                   );
                 }
               })}

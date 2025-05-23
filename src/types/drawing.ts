@@ -9,13 +9,13 @@ export type ShapeBase = {
 
 export type BrushShape = ShapeBase & {
   type: "brush";
-  points: [x: number, y: number][];
+  points: (readonly [x: number, y: number])[];
 };
 
 export type LineShape = ShapeBase & {
   type: "line";
-  startPoint: [x: number, y: number];
-  endPoint: [x: number, y: number];
+  startPoint: readonly [x: number, y: number];
+  endPoint: readonly [x: number, y: number];
 };
 
 export type EllipseShape = ShapeBase & {
@@ -36,10 +36,12 @@ export type RectangleShape = ShapeBase & {
 
 export type PolygonShape = ShapeBase & {
   type: "polygon";
-  x: number;
-  y: number;
-  sides: number;
-  radius: number;
+  lines: (readonly [
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number,
+  ])[];
 };
 
 export type Shape =
