@@ -3,6 +3,7 @@ import Konva from "konva";
 import { useState } from "react";
 import type { Tool, Shape } from "./types/drawing";
 import { v4 as uuidv4 } from "uuid";
+import { Button } from "./components/Button";
 
 function App() {
   const [tool, setTool] = useState<Tool>("brush");
@@ -60,12 +61,25 @@ function App() {
   return (
     <>
       {/* drawing toolbar */}
-      <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-        <button onClick={() => setTool("brush")}>Brush</button>
-        <button onClick={() => setTool("line")}>Line</button>
-        <button onClick={() => setTool("ellipse")}>Ellipse</button>
-        <button onClick={() => setTool("rectangle")}>Rectangle</button>
-        <button onClick={() => setTool("polygon")}>Polygon</button>
+      <div className="toolbar">
+        <Button pressed={tool === "brush"} onClick={() => setTool("brush")}>
+          Brush
+        </Button>
+        <Button pressed={tool === "line"} onClick={() => setTool("line")}>
+          Line
+        </Button>
+        <Button pressed={tool === "ellipse"} onClick={() => setTool("ellipse")}>
+          Ellipse
+        </Button>
+        <Button
+          pressed={tool === "rectangle"}
+          onClick={() => setTool("rectangle")}
+        >
+          Rectangle
+        </Button>
+        <Button pressed={tool === "polygon"} onClick={() => setTool("polygon")}>
+          Polygon
+        </Button>
       </div>
       {/* drawing canvas */}
       <div>
@@ -75,7 +89,6 @@ function App() {
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
-          style={{ border: "1px solid black" }}
         >
           <Layer>
             {shapes.map((shape) => {
