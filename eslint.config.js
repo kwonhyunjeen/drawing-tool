@@ -37,6 +37,7 @@ export default tseslint.config(
           },
         },
       ],
+      "unicorn/no-useless-undefined": "off",
       "unicorn/prevent-abbreviations": [
         "error",
         {
