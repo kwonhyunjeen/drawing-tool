@@ -68,7 +68,6 @@ function App() {
     const stage = event.target.getStage();
     const point = stage?.getPointerPosition();
 
-    console.log("MouseDown", id, point);
     if (!point) return;
 
     if (tool === "brush") {
@@ -143,7 +142,6 @@ function App() {
     const stage = event.target.getStage();
     const point = stage?.getPointerPosition();
 
-    // console.log("MouseMove", point);
     if (!point) return;
 
     setDraftShape((currentShape) => {
@@ -190,7 +188,6 @@ function App() {
     let processingShape = draftShape;
 
     if (!processingShape) {
-      console.log("MouseUp", shapes);
       return;
     }
 
