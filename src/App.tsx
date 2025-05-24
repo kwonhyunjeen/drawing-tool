@@ -2,44 +2,16 @@ import Konva from "konva";
 import { useEffect, useState } from "react";
 import { Layer, Stage } from "react-konva";
 import { v4 as uuidv4 } from "uuid";
-import {
-  BrushIcon,
-  EllipseIcon,
-  LineIcon,
-  PolygonIcon,
-  RectangleIcon,
-  UndoIcon,
-  RedoIcon,
-} from "./components/ui/Icon";
+import { BrushIcon, EllipseIcon, LineIcon, PolygonIcon, RectangleIcon, UndoIcon, RedoIcon } from "./components/ui/Icon";
 import { Button } from "./components/ui/Button";
 import { NumberField } from "./components/ui/NumberField";
 import { ColorPicker } from "./components/ui/ColorPicker";
-import {
-  closeBrushShape,
-  createBrushShape,
-  drawBrushShape,
-} from "./domains/brush";
+import { closeBrushShape, createBrushShape, drawBrushShape } from "./domains/brush";
 import { closeLineShape, createLineShape, drawLineShape } from "./domains/line";
-import {
-  closeEllipseShape,
-  createEllipseShape,
-  drawEllipseShape,
-} from "./domains/ellipse";
-import {
-  closeRectangleShape,
-  createRectangleShape,
-  drawRectangleShape,
-} from "./domains/rectangle";
-import {
-  createPolygonShape,
-  drawPolygonShape,
-  closePolygonShape,
-} from "./domains/polygon";
-import type {
-  ShapeDrawingStatus,
-  ShapeModel,
-  ShapeType,
-} from "./types/drawing";
+import { closeEllipseShape, createEllipseShape, drawEllipseShape } from "./domains/ellipse";
+import { closeRectangleShape, createRectangleShape, drawRectangleShape } from "./domains/rectangle";
+import { createPolygonShape, drawPolygonShape, closePolygonShape } from "./domains/polygon";
+import type { ShapeDrawingStatus, ShapeModel, ShapeType } from "./types/drawing";
 import { Brush } from "./components/shape/Brush";
 import { Line } from "./components/shape/Line";
 import { Ellipse } from "./components/shape/Ellipse";
@@ -167,9 +139,7 @@ function App() {
       previous: history.previous.slice(0, -1),
       next: [...history.next, target],
     });
-    setShapes(
-      shapes.filter((shape) => shape.id !== history.previous.at(-1)?.id),
-    );
+    setShapes(shapes.filter((shape) => shape.id !== history.previous.at(-1)?.id));
   };
 
   const redo = () => {
@@ -314,13 +284,7 @@ function App() {
                   return <Rectangle key={draftShape.id} shape={draftShape} />;
                 }
                 if (draftShape.type === "polygon") {
-                  return (
-                    <Polygon
-                      key={draftShape.id}
-                      shape={draftShape}
-                      draft={true}
-                    />
-                  );
+                  return <Polygon key={draftShape.id} shape={draftShape} draft={true} />;
                 }
               })()}
           </Layer>

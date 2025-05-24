@@ -9,12 +9,7 @@ const CLOSE_DISTANCE_THRESHOLD = 8; // px
 /**
  * 드로잉을 시작하기 위한 PolygonShape 객체 생성
  */
-export const createPolygonShape = (
-  id: string,
-  point: Vector2d,
-  color: string,
-  thick: number,
-): PolygonShapeModel => ({
+export const createPolygonShape = (id: string, point: Vector2d, color: string, thick: number): PolygonShapeModel => ({
   id,
   type: "polygon",
   points: [
@@ -28,10 +23,7 @@ export const createPolygonShape = (
 /**
  * 드로잉 중 마우스 위치에 따라 PolygonShape 객체 가공
  */
-export const drawPolygonShape = (
-  shape: PolygonShapeModel,
-  point: Vector2d,
-): PolygonShapeModel => ({
+export const drawPolygonShape = (shape: PolygonShapeModel, point: Vector2d): PolygonShapeModel => ({
   ...shape,
   points: [...shape.points.slice(0, -1), [point.x, point.y] as const],
 });
@@ -39,9 +31,7 @@ export const drawPolygonShape = (
 /**
  * 상호작용이 끝났을 때 PolygonShape 객체와 도형 완성 상태 반환
  */
-export const closePolygonShape = (
-  shape: PolygonShapeModel,
-): [shape: PolygonShapeModel, status: ShapeDrawingStatus] => {
+export const closePolygonShape = (shape: PolygonShapeModel): [shape: PolygonShapeModel, status: ShapeDrawingStatus] => {
   const startPoint = shape.points.at(0);
   const endPoint = shape.points.at(-1);
   if (!startPoint || !endPoint) {
@@ -55,8 +45,7 @@ export const closePolygonShape = (
 
   // 시작 점과 끝 점이 가까우면 다각형을 닫으려는(완성하려는) 것으로 판단
   const isCloseToStart =
-    Math.abs(startX - endX) <= CLOSE_DISTANCE_THRESHOLD &&
-    Math.abs(startY - endY) <= CLOSE_DISTANCE_THRESHOLD;
+    Math.abs(startX - endX) <= CLOSE_DISTANCE_THRESHOLD && Math.abs(startY - endY) <= CLOSE_DISTANCE_THRESHOLD;
 
   // 다각형이 완성되지 않은 경우, 다음 선을 그리기 위한 새로운 점을 추가하고 종료
   if (!hasEnoughPoints || !isCloseToStart) {

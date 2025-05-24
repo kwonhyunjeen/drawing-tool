@@ -23,10 +23,7 @@ export const createRectangleShape = (
 /**
  * 드로잉 중 마우스 위치에 따라 RectangleShape 객체 가공
  */
-export const drawRectangleShape = (
-  shape: RectangleShapeModel,
-  point: Vector2d,
-): RectangleShapeModel => ({
+export const drawRectangleShape = (shape: RectangleShapeModel, point: Vector2d): RectangleShapeModel => ({
   ...shape,
   width: point.x - shape.x,
   height: point.y - shape.y,

@@ -41,9 +41,4 @@ export type PolygonShapeModel = ShapeBaseModel & {
   points: (readonly [x: number, y: number])[];
 };
 
-export type ShapeModel =
-  | BrushShapeModel
-  | LineShapeModel
-  | EllipseShapeModel
-  | RectangleShapeModel
-  | PolygonShapeModel;
+export type ShapeModel = BrushShapeModel | LineShapeModel | EllipseShapeModel | RectangleShapeModel | PolygonShapeModel;

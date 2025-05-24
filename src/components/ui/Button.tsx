@@ -7,21 +7,9 @@ export type ButtonProps = React.ComponentPropsWithoutRef<"button"> & {
 };
 
 export const Button = forwardRef<ButtonRef, ButtonProps>((props, ref) => {
-  const {
-    children,
-    className,
-    type = "button",
-    pressed = false,
-    ...buttonProps
-  } = props;
+  const { children, className, type = "button", pressed = false, ...buttonProps } = props;
   return (
-    <button
-      ref={ref}
-      type={type}
-      className={cn("button", className)}
-      aria-pressed={pressed}
-      {...buttonProps}
-    >
+    <button ref={ref} type={type} className={cn("button", className)} aria-pressed={pressed} {...buttonProps}>
       {children}
     </button>
   );

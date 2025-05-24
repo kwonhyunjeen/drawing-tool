@@ -9,13 +9,7 @@ export const Line: React.FC<LineProps> = (props) => {
   const { shape } = props;
   const { startPoint, endPoint, stroke, strokeWidth } = shape;
 
-  return (
-    <KonvaLine
-      points={[...startPoint, ...endPoint]}
-      stroke={stroke}
-      strokeWidth={strokeWidth}
-    />
-  );
+  return <KonvaLine points={[...startPoint, ...endPoint]} stroke={stroke} strokeWidth={strokeWidth} />;
 };
 
 Line.displayName = "Line";
