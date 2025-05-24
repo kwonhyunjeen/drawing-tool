@@ -7,10 +7,11 @@ import type { ShapeModel } from "../../types/drawing";
 
 export type ShapeProps = {
   shape: ShapeModel;
+  draft?: boolean;
 };
 
 export const Shape: React.FC<ShapeProps> = (props) => {
-  const { shape } = props;
+  const { shape, draft } = props;
 
   if (shape.type === "brush") {
     return <Brush key={shape.id} shape={shape} />;
@@ -25,7 +26,7 @@ export const Shape: React.FC<ShapeProps> = (props) => {
     return <Rectangle key={shape.id} shape={shape} />;
   }
   if (shape.type === "polygon") {
-    return <Polygon key={shape.id} shape={shape} />;
+    return <Polygon key={shape.id} shape={shape} draft={draft} />;
   }
 
   console.error("Unknown shape type:", shape);

@@ -36,12 +36,7 @@ export type RectangleShapeModel = ShapeBaseModel & {
 
 export type PolygonShapeModel = ShapeBaseModel & {
   type: "polygon";
-  lines: (readonly [
-    startX: number,
-    startY: number,
-    endX: number,
-    endY: number,
-  ])[];
+  points: (readonly [x: number, y: number])[];
 };
 
 export type ShapeModel =

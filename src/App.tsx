@@ -109,31 +109,18 @@ function App() {
       setDraftShape(newShape);
     }
     if (tool === "polygon") {
-      const newLine = [point.x, point.y, point.x, point.y] as const;
       setDraftShape((currentShape) => {
+        // 이미 다각형을 그리고 있을 경우, 새로 생성하지 않음
         if (currentShape?.type === "polygon") {
-          const firstLine = currentShape.lines.at(0);
-          const lastLine = currentShape.lines.at(-1);
-          if (!firstLine || !lastLine) {
-            throw new Error("No first or last line");
-          }
-          const [firstStartX, firstStartY] = firstLine;
-          const [, , lastEndX, lastEndY] = lastLine;
-          if (
-            Math.abs(firstStartX - lastEndX) <= CLOSE_DISTANCE_THRESHOLD &&
-            Math.abs(firstStartY - lastEndY) <= CLOSE_DISTANCE_THRESHOLD
-          ) {
-            return currentShape;
-          }
-          return {
-            ...currentShape,
-            lines: [...currentShape.lines, newLine],
-          } satisfies PolygonShapeModel;
+          return currentShape;
         }
         const newShape: PolygonShapeModel = {
           id,
           type: "polygon",
-          lines: [newLine],
+          points: [
+            [point.x, point.y],
+            [point.x, point.y],
+          ],
           stroke: color,
           strokeWidth: thick,
         };
@@ -177,17 +164,12 @@ function App() {
         } satisfies RectangleShapeModel;
       }
       if (currentShape?.type === "polygon") {
-        const lastLine = currentShape.lines.at(-1);
-        if (!lastLine) {
-          throw new Error("No last line");
-        }
-        const newLines = [
-          ...currentShape.lines.slice(0, -1),
-          [lastLine[0], lastLine[1], point.x, point.y] as const,
-        ];
         return {
           ...currentShape,
-          lines: newLines,
+          points: [
+            ...currentShape.points.slice(0, -1),
+            [point.x, point.y] as const,
+          ],
         } satisfies PolygonShapeModel;
       }
       return currentShape;
@@ -195,40 +177,45 @@ function App() {
   };
 
   const handleMouseUp = () => {
-    if (!draftShape) {
+    let processingShape = draftShape;
+
+    if (!processingShape) {
       console.log("MouseUp", shapes);
       return;
     }
 
-    let saveShape = draftShape;
+    if (processingShape.type === "polygon") {
+      const startPoint = processingShape.points.at(0);
+      const endPoint = processingShape.points.at(-1);
+      if (!startPoint || !endPoint) {
+        throw new Error("No start or end point");
+      }
+      const [startX, startY] = startPoint;
+      const [endX, endY] = endPoint;
 
-    if (saveShape.type === "polygon") {
-      if (saveShape.lines.length < 3) {
-        return;
+      // 다각형이 완성되려면 최소 3개의 점이 필요
+      const hasEnoughPoints = processingShape.points.length >= 3;
+      // 시작 점과 끝 점이 가까워야 다각형이 완성된 것으로 판단
+      const isCloseToStart =
+        Math.abs(startX - endX) <= CLOSE_DISTANCE_THRESHOLD &&
+        Math.abs(startY - endY) <= CLOSE_DISTANCE_THRESHOLD;
+
+      // 다각형이 완성되지 않은 경우, draft에 새로운 점을 추가하고 종료
+      if (!hasEnoughPoints || !isCloseToStart) {
+        return setDraftShape({
+          ...processingShape,
+          points: [...processingShape.points, [endX, endY] as const],
+        } satisfies PolygonShapeModel);
       }
-      const firstLine = saveShape.lines.at(0);
-      const lastLine = saveShape.lines.at(-1);
-      if (!firstLine || !lastLine) {
-        throw new Error("No first or last line");
-      }
-      const [firstStartX, firstStartY] = firstLine;
-      const [lastStartX, lastStartY, lastEndX, lastEndY] = lastLine;
-      if (
-        Math.abs(firstStartX - lastEndX) > CLOSE_DISTANCE_THRESHOLD ||
-        Math.abs(firstStartY - lastEndY) > CLOSE_DISTANCE_THRESHOLD
-      ) {
-        return;
-      }
-      saveShape = {
-        ...saveShape,
-        lines: [
-          ...saveShape.lines.slice(0, -1),
-          [lastStartX, lastStartY, firstStartX, firstStartY] as const,
-        ],
+
+      // 다각형이 완성된 경우, 끝 점은 시작 점과 동일하므로 제거
+      processingShape = {
+        ...processingShape,
+        points: processingShape.points.slice(0, -1),
       } satisfies PolygonShapeModel;
     }
 
-    const newShapes = [...shapes, saveShape];
+    const newShapes = [...shapes, processingShape];
     console.log("MouseUp", newShapes);
     setDraftShape(undefined);
     return setShapes(newShapes);
@@ -318,7 +305,9 @@ function App() {
             {shapes.map((shape) => (
               <Shape key={shape.id} shape={shape} />
             ))}
-            {draftShape && <Shape key={draftShape.id} shape={draftShape} />}
+            {draftShape && (
+              <Shape key={draftShape.id} shape={draftShape} draft={true} />
+            )}
           </Layer>
         </Stage>
       </div>
