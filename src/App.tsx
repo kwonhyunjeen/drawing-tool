@@ -1,6 +1,17 @@
-import { Ellipse, Group, Layer, Line, Rect, Stage } from "react-konva";
 import Konva from "konva";
 import { useEffect, useState } from "react";
+import { Ellipse, Group, Layer, Line, Rect, Stage } from "react-konva";
+import { v4 as uuidv4 } from "uuid";
+import {
+  BrushIcon,
+  EllipseIcon,
+  LineIcon,
+  PolygonIcon,
+  RectangleIcon,
+} from "./components/Icon";
+import { Button } from "./components/Button";
+import { NumberField } from "./components/NumberField";
+import { ColorPicker } from "./components/ColorPicker";
 import type {
   Tool,
   Shape,
@@ -10,8 +21,6 @@ import type {
   RectangleShape,
   PolygonShape,
 } from "./types/drawing";
-import { v4 as uuidv4 } from "uuid";
-import { Button } from "./components/Button";
 import { nonNullable } from "./utils/nonNullable";
 
 const CLOSE_DISTANCE_THRESHOLD = 8; // px
@@ -226,40 +235,75 @@ function App() {
   };
 
   return (
-    <>
-      {/* drawing toolbar */}
+    <div className="app">
+      {/* drawing menu */}
       <div className="toolbar">
-        <Button pressed={tool === "brush"} onClick={() => setTool("brush")}>
-          Brush
-        </Button>
-        <Button pressed={tool === "line"} onClick={() => setTool("line")}>
-          Line
-        </Button>
-        <Button pressed={tool === "ellipse"} onClick={() => setTool("ellipse")}>
-          Ellipse
-        </Button>
-        <Button
-          pressed={tool === "rectangle"}
-          onClick={() => setTool("rectangle")}
-        >
-          Rectangle
-        </Button>
-        <Button pressed={tool === "polygon"} onClick={() => setTool("polygon")}>
-          Polygon
-        </Button>
-        <input
-          type="number"
-          min={5}
-          max={50}
-          value={thick}
-          onChange={(event) => setThick(Number(event.target.value))}
-        />
-        <input
-          type="color"
-          className="color-picker"
-          value={color}
-          onChange={(event) => setColor(event.target.value)}
-        />
+        <div className="toolbar-tools">
+          <Button
+            className="toolbar-button"
+            pressed={tool === "brush"}
+            onClick={() => setTool("brush")}
+            aria-label="Brush"
+            title="Brush"
+          >
+            <BrushIcon />
+          </Button>
+          <Button
+            className="toolbar-button"
+            pressed={tool === "line"}
+            onClick={() => setTool("line")}
+            aria-label="Line"
+            title="Line"
+          >
+            <LineIcon />
+          </Button>
+          <Button
+            className="toolbar-button"
+            pressed={tool === "ellipse"}
+            onClick={() => setTool("ellipse")}
+            aria-label="Ellipse"
+            title="Ellipse"
+          >
+            <EllipseIcon />
+          </Button>
+          <Button
+            className="toolbar-button"
+            pressed={tool === "rectangle"}
+            onClick={() => setTool("rectangle")}
+            aria-label="Rectangle"
+            title="Rectangle"
+          >
+            <RectangleIcon />
+          </Button>
+          <Button
+            className="toolbar-button"
+            pressed={tool === "polygon"}
+            onClick={() => setTool("polygon")}
+            aria-label="Polygon"
+            title="Polygon"
+          >
+            <PolygonIcon />
+          </Button>
+        </div>
+        <div className="toolbar-separator" />
+        <div className="toolbar-controls">
+          <NumberField
+            className="toolbar-field"
+            value={thick}
+            onChange={(event) => setThick(Number(event.target.value))}
+            min={5}
+            max={50}
+            aria-label="Stroke thickness"
+            title="Stroke thickness (5-50px)"
+          />
+          <ColorPicker
+            className="toolbar-color-picker"
+            value={color}
+            onChange={(event) => setColor(event.target.value)}
+            aria-label="Stroke color"
+            title="Stroke color"
+          />
+        </div>
       </div>
       {/* drawing canvas */}
       <div>
@@ -342,7 +386,7 @@ function App() {
           </Layer>
         </Stage>
       </div>
-    </>
+    </div>
   );
 }
 
