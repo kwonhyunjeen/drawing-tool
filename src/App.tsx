@@ -14,12 +14,12 @@ import { NumberField } from "./components/ui/NumberField";
 import { ColorPicker } from "./components/ui/ColorPicker";
 import type {
   Tool,
-  Shape,
-  BrushShape,
-  LineShape,
-  EllipseShape,
-  RectangleShape,
-  PolygonShape,
+  ShapeModel,
+  BrushShapeModel,
+  LineShapeModel,
+  EllipseShapeModel,
+  RectangleShapeModel,
+  PolygonShapeModel,
 } from "./types/drawing";
 import { nonNullable } from "./utils/nonNullable";
 
@@ -30,11 +30,11 @@ function App() {
   const [thick, setThick] = useState(5);
   const [color, setColor] = useState("#000000");
 
-  const [shapes, setShapes] = useState<Shape[]>(() => {
+  const [shapes, setShapes] = useState<ShapeModel[]>(() => {
     try {
       const saved = sessionStorage.getItem("shapes");
       if (!saved) return [];
-      const parsed = JSON.parse(saved) as Shape[];
+      const parsed = JSON.parse(saved) as ShapeModel[];
       if (!Array.isArray(parsed)) return [];
       return parsed;
     } catch (error) {
@@ -42,7 +42,7 @@ function App() {
       return [];
     }
   });
-  const [draftShape, setDraftShape] = useState<Shape>();
+  const [draftShape, setDraftShape] = useState<ShapeModel>();
 
   useEffect(() => {
     try {
@@ -62,7 +62,7 @@ function App() {
     if (!point) return;
 
     if (tool === "brush") {
-      const newShape: BrushShape = {
+      const newShape: BrushShapeModel = {
         id,
         type: "brush",
         points: [[point.x, point.y]],
@@ -72,7 +72,7 @@ function App() {
       setDraftShape(newShape);
     }
     if (tool === "line") {
-      const newShape: LineShape = {
+      const newShape: LineShapeModel = {
         id,
         type: "line",
         startPoint: [point.x, point.y],
@@ -83,7 +83,7 @@ function App() {
       setDraftShape(newShape);
     }
     if (tool === "ellipse") {
-      const newShape: EllipseShape = {
+      const newShape: EllipseShapeModel = {
         id,
         type: "ellipse",
         x: point.x,
@@ -96,7 +96,7 @@ function App() {
       setDraftShape(newShape);
     }
     if (tool === "rectangle") {
-      const newShape: RectangleShape = {
+      const newShape: RectangleShapeModel = {
         id,
         type: "rectangle",
         x: point.x,
@@ -128,9 +128,9 @@ function App() {
           return {
             ...currentShape,
             lines: [...currentShape.lines, newLine],
-          } satisfies PolygonShape;
+          } satisfies PolygonShapeModel;
         }
-        const newShape: PolygonShape = {
+        const newShape: PolygonShapeModel = {
           id,
           type: "polygon",
           lines: [newLine],
@@ -154,27 +154,27 @@ function App() {
         return {
           ...currentShape,
           points: [...currentShape.points, [point.x, point.y]],
-        } satisfies BrushShape;
+        } satisfies BrushShapeModel;
       }
       if (currentShape?.type === "line") {
         return {
           ...currentShape,
           endPoint: [point.x, point.y],
-        } satisfies LineShape;
+        } satisfies LineShapeModel;
       }
       if (currentShape?.type === "ellipse") {
         return {
           ...currentShape,
           width: point.x - currentShape.x,
           height: point.y - currentShape.y,
-        } satisfies EllipseShape;
+        } satisfies EllipseShapeModel;
       }
       if (currentShape?.type === "rectangle") {
         return {
           ...currentShape,
           width: point.x - currentShape.x,
           height: point.y - currentShape.y,
-        } satisfies RectangleShape;
+        } satisfies RectangleShapeModel;
       }
       if (currentShape?.type === "polygon") {
         const lastLine = currentShape.lines.at(-1);
@@ -188,7 +188,7 @@ function App() {
         return {
           ...currentShape,
           lines: newLines,
-        } satisfies PolygonShape;
+        } satisfies PolygonShapeModel;
       }
       return currentShape;
     });
@@ -225,7 +225,7 @@ function App() {
           ...saveShape.lines.slice(0, -1),
           [lastStartX, lastStartY, firstStartX, firstStartY] as const,
         ],
-      } satisfies PolygonShape;
+      } satisfies PolygonShapeModel;
     }
 
     const newShapes = [...shapes, saveShape];

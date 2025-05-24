@@ -1,24 +1,24 @@
 export type Tool = "brush" | "line" | "ellipse" | "rectangle" | "polygon";
 
-export type ShapeBase = {
+export type ShapeBaseModel = {
   id: string;
   type: Tool;
   stroke?: string;
   strokeWidth?: number;
 };
 
-export type BrushShape = ShapeBase & {
+export type BrushShapeModel = ShapeBaseModel & {
   type: "brush";
   points: (readonly [x: number, y: number])[];
 };
 
-export type LineShape = ShapeBase & {
+export type LineShapeModel = ShapeBaseModel & {
   type: "line";
   startPoint: readonly [x: number, y: number];
   endPoint: readonly [x: number, y: number];
 };
 
-export type EllipseShape = ShapeBase & {
+export type EllipseShapeModel = ShapeBaseModel & {
   type: "ellipse";
   x: number;
   y: number;
@@ -26,7 +26,7 @@ export type EllipseShape = ShapeBase & {
   height: number;
 };
 
-export type RectangleShape = ShapeBase & {
+export type RectangleShapeModel = ShapeBaseModel & {
   type: "rectangle";
   x: number;
   y: number;
@@ -34,7 +34,7 @@ export type RectangleShape = ShapeBase & {
   height: number;
 };
 
-export type PolygonShape = ShapeBase & {
+export type PolygonShapeModel = ShapeBaseModel & {
   type: "polygon";
   lines: (readonly [
     startX: number,
@@ -44,9 +44,9 @@ export type PolygonShape = ShapeBase & {
   ])[];
 };
 
-export type Shape =
-  | BrushShape
-  | LineShape
-  | EllipseShape
-  | RectangleShape
-  | PolygonShape;
+export type ShapeModel =
+  | BrushShapeModel
+  | LineShapeModel
+  | EllipseShapeModel
+  | RectangleShapeModel
+  | PolygonShapeModel;
