@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { useEffect, useState } from "react";
-import { Ellipse, Group, Layer, Line, Rect, Stage } from "react-konva";
+import { Layer, Stage } from "react-konva";
 import { v4 as uuidv4 } from "uuid";
 import {
   BrushIcon,
@@ -12,6 +12,7 @@ import {
 import { Button } from "./components/ui/Button";
 import { NumberField } from "./components/ui/NumberField";
 import { ColorPicker } from "./components/ui/ColorPicker";
+import { Shape } from "./components/shape/Shape";
 import type {
   Tool,
   ShapeModel,
@@ -21,7 +22,6 @@ import type {
   RectangleShapeModel,
   PolygonShapeModel,
 } from "./types/drawing";
-import { nonNullable } from "./utils/nonNullable";
 
 const CLOSE_DISTANCE_THRESHOLD = 8; // px
 
@@ -315,74 +315,10 @@ function App() {
           onMouseUp={handleMouseUp}
         >
           <Layer>
-            {[...shapes, draftShape]
-              .filter((shape) => nonNullable(shape))
-              .map((shape) => {
-                if (shape.type === "brush") {
-                  return (
-                    <Line
-                      key={shape.id}
-                      points={shape.points.flat()}
-                      stroke={shape.stroke}
-                      strokeWidth={shape.strokeWidth}
-                    />
-                  );
-                }
-                if (shape.type === "line") {
-                  return (
-                    <Line
-                      key={shape.id}
-                      points={[...shape.startPoint, ...shape.endPoint]}
-                      stroke={shape.stroke}
-                      strokeWidth={shape.strokeWidth}
-                    />
-                  );
-                }
-                if (shape.type === "ellipse") {
-                  const radiusX = shape.width / 2;
-                  const radiusY = shape.height / 2;
-                  return (
-                    <Ellipse
-                      key={shape.id}
-                      x={shape.x}
-                      y={shape.y}
-                      radiusX={Math.abs(radiusX)}
-                      radiusY={Math.abs(radiusY)}
-                      offsetX={-radiusX}
-                      offsetY={-radiusY}
-                      stroke={shape.stroke}
-                      strokeWidth={shape.strokeWidth}
-                    />
-                  );
-                }
-                if (shape.type === "rectangle") {
-                  return (
-                    <Rect
-                      key={shape.id}
-                      x={shape.x}
-                      y={shape.y}
-                      width={shape.width}
-                      height={shape.height}
-                      stroke={shape.stroke}
-                      strokeWidth={shape.strokeWidth}
-                    />
-                  );
-                }
-                if (shape.type === "polygon") {
-                  return (
-                    <Group key={shape.id}>
-                      {shape.lines.map((line, index) => (
-                        <Line
-                          key={`${shape.id}-${index}`}
-                          points={[...line]}
-                          stroke={shape.stroke}
-                          strokeWidth={shape.strokeWidth}
-                        />
-                      ))}
-                    </Group>
-                  );
-                }
-              })}
+            {shapes.map((shape) => (
+              <Shape key={shape.id} shape={shape} />
+            ))}
+            {draftShape && <Shape key={draftShape.id} shape={draftShape} />}
           </Layer>
         </Stage>
       </div>
