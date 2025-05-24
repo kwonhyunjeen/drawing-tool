@@ -118,23 +118,21 @@ function App() {
       setDraftShape(newShape);
     }
     if (tool === "polygon") {
-      setDraftShape((currentShape) => {
-        // 이미 다각형을 그리고 있을 경우, 새로 생성하지 않음
-        if (currentShape?.type === "polygon") {
-          return currentShape;
-        }
-        const newShape: PolygonShapeModel = {
-          id,
-          type: "polygon",
-          points: [
-            [point.x, point.y],
-            [point.x, point.y],
-          ],
-          stroke: color,
-          strokeWidth: thick,
-        };
-        return newShape;
-      });
+      // 이미 다각형을 그리고 있을 경우, 새로 생성하지 않음
+      if (draftShape?.type === "polygon") {
+        return;
+      }
+      const newShape: PolygonShapeModel = {
+        id,
+        type: "polygon",
+        points: [
+          [point.x, point.y],
+          [point.x, point.y],
+        ],
+        stroke: color,
+        strokeWidth: thick,
+      };
+      setDraftShape(newShape);
     }
   };
 
@@ -223,45 +221,36 @@ function App() {
     }
 
     const newShapes = [...shapes, processingShape];
-    setHistory((previousHistory) => ({
+    setHistory({
       // 최대 40개까지 저장
-      previous: [...previousHistory.previous, processingShape].slice(-40),
+      previous: [...history.previous, processingShape].slice(-40),
       // 새로운 기록이 추가되면 그동안 되돌렸던 기록들을 덮어씀
       next: [],
-    }));
+    });
     setShapes(newShapes);
     setDraftShape(undefined);
   };
 
   const handleUndoClick = () => {
-    setHistory((previousHistory) => {
-      const target = previousHistory.previous.at(-1);
-      if (!target) return previousHistory;
-      return {
-        previous: previousHistory.previous.slice(0, -1),
-        next: [...previousHistory.next, target],
-      };
+    const target = history.previous.at(-1);
+    if (!target) return history;
+    setHistory({
+      previous: history.previous.slice(0, -1),
+      next: [...history.next, target],
     });
-    setShapes((previousShapes) =>
-      previousShapes.filter(
-        (shape) => shape.id !== history.previous.at(-1)?.id,
-      ),
+    setShapes(
+      shapes.filter((shape) => shape.id !== history.previous.at(-1)?.id),
     );
   };
 
   const handleRedoClick = () => {
-    setHistory((previousHistory) => {
-      const target = previousHistory.next.at(-1);
-      if (!target) return previousHistory;
-      return {
-        previous: [...previousHistory.previous, target],
-        next: previousHistory.next.slice(0, -1),
-      };
+    const target = history.next.at(-1);
+    if (!target) return history;
+    setHistory({
+      previous: [...history.previous, target],
+      next: history.next.slice(0, -1),
     });
-    setShapes((previousShapes) => [
-      ...previousShapes,
-      history.next.at(-1) as ShapeModel,
-    ]);
+    setShapes([...shapes, history.next.at(-1) as ShapeModel]);
   };
 
   return (
