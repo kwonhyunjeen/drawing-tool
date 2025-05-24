@@ -1,6 +1,6 @@
 import { Ellipse, Group, Layer, Line, Rect, Stage } from "react-konva";
 import Konva from "konva";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type {
   Tool,
   Shape,
@@ -18,8 +18,28 @@ const CLOSE_DISTANCE_THRESHOLD = 8; // px
 
 function App() {
   const [tool, setTool] = useState<Tool>("brush");
-  const [shapes, setShapes] = useState<Shape[]>([]);
+  const [shapes, setShapes] = useState<Shape[]>(() => {
+    try {
+      const saved = sessionStorage.getItem("shapes");
+      if (!saved) return [];
+      const parsed = JSON.parse(saved) as Shape[];
+      if (!Array.isArray(parsed)) return [];
+      return parsed;
+    } catch (error) {
+      console.error("Failed to parse saved shapes.", error);
+      return [];
+    }
+  });
   const [draftShape, setDraftShape] = useState<Shape>();
+
+  useEffect(() => {
+    try {
+      const serialized = JSON.stringify(shapes);
+      sessionStorage.setItem("shapes", serialized);
+    } catch (error) {
+      console.error("Failed to save shapes.", error);
+    }
+  }, [shapes]);
 
   const handleMouseDown = (event: Konva.KonvaEventObject<MouseEvent>) => {
     const id = uuidv4();
