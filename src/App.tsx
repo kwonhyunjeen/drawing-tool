@@ -8,10 +8,10 @@ import {
   LineIcon,
   PolygonIcon,
   RectangleIcon,
-} from "./components/Icon";
-import { Button } from "./components/Button";
-import { NumberField } from "./components/NumberField";
-import { ColorPicker } from "./components/ColorPicker";
+} from "./components/ui/Icon";
+import { Button } from "./components/ui/Button";
+import { NumberField } from "./components/ui/NumberField";
+import { ColorPicker } from "./components/ui/ColorPicker";
 import type {
   Tool,
   Shape,

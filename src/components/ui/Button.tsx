@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { cn } from "../utils/className";
+import { cn } from "../../utils/className";
 
 export type ButtonRef = React.ComponentRef<"button">;
 export type ButtonProps = React.ComponentPropsWithoutRef<"button"> & {

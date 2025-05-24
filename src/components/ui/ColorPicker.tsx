@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { cn } from "../utils/className";
+import { cn } from "../../utils/className";
 
 export type ColorPickerRef = React.ComponentRef<"input">;
 export type ColorPickerProps = Omit<

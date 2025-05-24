@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { cn } from "../utils/className";
+import { cn } from "../../utils/className";
 
 export type NumberFieldRef = React.ComponentRef<"input">;
 export type NumberFieldProps = Omit<
