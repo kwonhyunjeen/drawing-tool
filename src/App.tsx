@@ -18,6 +18,8 @@ const CLOSE_DISTANCE_THRESHOLD = 8; // px
 
 function App() {
   const [tool, setTool] = useState<Tool>("brush");
+  const [color, setColor] = useState("#000000");
+
   const [shapes, setShapes] = useState<Shape[]>(() => {
     try {
       const saved = sessionStorage.getItem("shapes");
@@ -54,7 +56,7 @@ function App() {
         id,
         type: "brush",
         points: [[point.x, point.y]],
-        stroke: "#dd0000",
+        stroke: color,
         strokeWidth: 5,
       };
       setDraftShape(newShape);
@@ -65,7 +67,7 @@ function App() {
         type: "line",
         startPoint: [point.x, point.y],
         endPoint: [point.x, point.y],
-        stroke: "#dddd00",
+        stroke: color,
         strokeWidth: 5,
       };
       setDraftShape(newShape);
@@ -78,7 +80,7 @@ function App() {
         y: point.y,
         width: 0,
         height: 0,
-        stroke: "#00dd00",
+        stroke: color,
         strokeWidth: 5,
       };
       setDraftShape(newShape);
@@ -91,7 +93,7 @@ function App() {
         y: point.y,
         width: 0,
         height: 0,
-        stroke: "#0000dd",
+        stroke: color,
         strokeWidth: 5,
       };
       setDraftShape(newShape);
@@ -122,7 +124,7 @@ function App() {
           id,
           type: "polygon",
           lines: [newLine],
-          stroke: "#dd00dd",
+          stroke: color,
           strokeWidth: 5,
         };
         return newShape;
@@ -244,6 +246,12 @@ function App() {
         <Button pressed={tool === "polygon"} onClick={() => setTool("polygon")}>
           Polygon
         </Button>
+        <input
+          type="color"
+          className="color-picker"
+          value={color}
+          onChange={(event) => setColor(event.target.value)}
+        />
       </div>
       {/* drawing canvas */}
       <div>

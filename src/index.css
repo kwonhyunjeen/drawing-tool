@@ -70,6 +70,20 @@ Components
   background-color: #2e578c;
 }
 
+.color-picker {
+  width: 32px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  border: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.color-picker::-webkit-color-swatch {
+  border: none;
+}
+
 .toolbar {
   display: flex;
   padding: 0.75rem 1rem;
