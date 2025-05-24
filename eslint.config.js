@@ -39,6 +39,7 @@ export default tseslint.config(
       ],
       "unicorn/no-unreadable-array-destructuring": "off",
       "unicorn/no-useless-undefined": "off",
+      "unicorn/prefer-switch": ["error", { minimumCases: 6 }],
       "unicorn/prevent-abbreviations": [
         "error",
         {

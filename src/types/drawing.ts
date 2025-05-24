@@ -1,8 +1,10 @@
-export type Tool = "brush" | "line" | "ellipse" | "rectangle" | "polygon";
+export type ShapeType = "brush" | "line" | "ellipse" | "rectangle" | "polygon";
+
+export type ShapeDrawingStatus = "opened" | "closed" | "invalid";
 
 export type ShapeBaseModel = {
   id: string;
-  type: Tool;
+  type: ShapeType;
   stroke?: string;
   strokeWidth?: number;
 };

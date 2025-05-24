@@ -14,21 +14,40 @@ import {
 import { Button } from "./components/ui/Button";
 import { NumberField } from "./components/ui/NumberField";
 import { ColorPicker } from "./components/ui/ColorPicker";
-import { Shape } from "./components/shape/Shape";
+import {
+  closeBrushShape,
+  createBrushShape,
+  drawBrushShape,
+} from "./domains/brush";
+import { closeLineShape, createLineShape, drawLineShape } from "./domains/line";
+import {
+  closeEllipseShape,
+  createEllipseShape,
+  drawEllipseShape,
+} from "./domains/ellipse";
+import {
+  closeRectangleShape,
+  createRectangleShape,
+  drawRectangleShape,
+} from "./domains/rectangle";
+import {
+  createPolygonShape,
+  drawPolygonShape,
+  closePolygonShape,
+} from "./domains/polygon";
 import type {
-  Tool,
+  ShapeDrawingStatus,
   ShapeModel,
-  BrushShapeModel,
-  LineShapeModel,
-  EllipseShapeModel,
-  RectangleShapeModel,
-  PolygonShapeModel,
+  ShapeType,
 } from "./types/drawing";
-
-const CLOSE_DISTANCE_THRESHOLD = 8; // px
+import { Brush } from "./components/shape/Brush";
+import { Line } from "./components/shape/Line";
+import { Ellipse } from "./components/shape/Ellipse";
+import { Rectangle } from "./components/shape/Rectangle";
+import { Polygon } from "./components/shape/Polygon";
 
 function App() {
-  const [tool, setTool] = useState<Tool>("brush");
+  const [tool, setTool] = useState<ShapeType>("brush");
   const [thick, setThick] = useState(5);
   const [color, setColor] = useState("#000000");
 
@@ -64,174 +83,84 @@ function App() {
   }, [shapes]);
 
   const handleMouseDown = (event: Konva.KonvaEventObject<MouseEvent>) => {
-    const id = uuidv4();
-    const stage = event.target.getStage();
-    const point = stage?.getPointerPosition();
+    // 이미 도형을 그리고 있다면 새로 그리지 않도록 무시
+    if (draftShape) return;
 
+    const id = uuidv4();
+    const point = event.target.getStage()?.getPointerPosition();
     if (!point) return;
 
+    // 도형 객체 생성
     if (tool === "brush") {
-      const newShape: BrushShapeModel = {
-        id,
-        type: "brush",
-        points: [[point.x, point.y]],
-        stroke: color,
-        strokeWidth: thick,
-      };
-      setDraftShape(newShape);
-    }
-    if (tool === "line") {
-      const newShape: LineShapeModel = {
-        id,
-        type: "line",
-        startPoint: [point.x, point.y],
-        endPoint: [point.x, point.y],
-        stroke: color,
-        strokeWidth: thick,
-      };
-      setDraftShape(newShape);
-    }
-    if (tool === "ellipse") {
-      const newShape: EllipseShapeModel = {
-        id,
-        type: "ellipse",
-        x: point.x,
-        y: point.y,
-        width: 0,
-        height: 0,
-        stroke: color,
-        strokeWidth: thick,
-      };
-      setDraftShape(newShape);
-    }
-    if (tool === "rectangle") {
-      const newShape: RectangleShapeModel = {
-        id,
-        type: "rectangle",
-        x: point.x,
-        y: point.y,
-        width: 0,
-        height: 0,
-        stroke: color,
-        strokeWidth: thick,
-      };
-      setDraftShape(newShape);
-    }
-    if (tool === "polygon") {
-      // 이미 다각형을 그리고 있을 경우, 새로 생성하지 않음
-      if (draftShape?.type === "polygon") {
-        return;
-      }
-      const newShape: PolygonShapeModel = {
-        id,
-        type: "polygon",
-        points: [
-          [point.x, point.y],
-          [point.x, point.y],
-        ],
-        stroke: color,
-        strokeWidth: thick,
-      };
-      setDraftShape(newShape);
+      setDraftShape(createBrushShape(id, point, color, thick));
+    } else if (tool === "line") {
+      setDraftShape(createLineShape(id, point, color, thick));
+    } else if (tool === "ellipse") {
+      setDraftShape(createEllipseShape(id, point, color, thick));
+    } else if (tool === "rectangle") {
+      setDraftShape(createRectangleShape(id, point, color, thick));
+    } else if (tool === "polygon") {
+      setDraftShape(createPolygonShape(id, point, color, thick));
     }
   };
 
   const handleMouseMove = (event: Konva.KonvaEventObject<MouseEvent>) => {
-    const stage = event.target.getStage();
-    const point = stage?.getPointerPosition();
-
+    const point = event.target.getStage()?.getPointerPosition();
     if (!point) return;
 
+    // 마우스 위치에 따라 도형 객체 가공
     setDraftShape((currentShape) => {
       if (currentShape?.type === "brush") {
-        return {
-          ...currentShape,
-          points: [...currentShape.points, [point.x, point.y]],
-        } satisfies BrushShapeModel;
-      }
-      if (currentShape?.type === "line") {
-        return {
-          ...currentShape,
-          endPoint: [point.x, point.y],
-        } satisfies LineShapeModel;
-      }
-      if (currentShape?.type === "ellipse") {
-        return {
-          ...currentShape,
-          width: point.x - currentShape.x,
-          height: point.y - currentShape.y,
-        } satisfies EllipseShapeModel;
-      }
-      if (currentShape?.type === "rectangle") {
-        return {
-          ...currentShape,
-          width: point.x - currentShape.x,
-          height: point.y - currentShape.y,
-        } satisfies RectangleShapeModel;
-      }
-      if (currentShape?.type === "polygon") {
-        return {
-          ...currentShape,
-          points: [
-            ...currentShape.points.slice(0, -1),
-            [point.x, point.y] as const,
-          ],
-        } satisfies PolygonShapeModel;
+        return drawBrushShape(currentShape, point);
+      } else if (currentShape?.type === "line") {
+        return drawLineShape(currentShape, point);
+      } else if (currentShape?.type === "ellipse") {
+        return drawEllipseShape(currentShape, point);
+      } else if (currentShape?.type === "rectangle") {
+        return drawRectangleShape(currentShape, point);
+      } else if (currentShape?.type === "polygon") {
+        return drawPolygonShape(currentShape, point);
       }
       return currentShape;
     });
   };
 
   const handleMouseUp = () => {
+    // 그릴 도형이 없다면 무시
+    if (!draftShape) return;
+
     let processingShape = draftShape;
+    let status: ShapeDrawingStatus = "invalid";
 
-    if (!processingShape) {
-      return;
+    // 도형 완성
+    if (processingShape.type === "brush") {
+      [processingShape, status] = closeBrushShape(processingShape);
+    } else if (processingShape.type === "line") {
+      [processingShape, status] = closeLineShape(processingShape);
+    } else if (processingShape.type === "ellipse") {
+      [processingShape, status] = closeEllipseShape(processingShape);
+    } else if (processingShape.type === "rectangle") {
+      [processingShape, status] = closeRectangleShape(processingShape);
+    } else if (processingShape.type === "polygon") {
+      [processingShape, status] = closePolygonShape(processingShape);
     }
 
-    if (processingShape.type === "polygon") {
-      const startPoint = processingShape.points.at(0);
-      const endPoint = processingShape.points.at(-1);
-      if (!startPoint || !endPoint) {
-        throw new Error("No start or end point");
-      }
-      const [startX, startY] = startPoint;
-      const [endX, endY] = endPoint;
+    // 도형이 유효하지 않은 경우(이동 거리가 너무 짧은 경우 등), draft를 비우고 무시
+    if (status === "invalid") return setDraftShape(undefined);
 
-      // 다각형이 완성되려면 최소 3개의 점이 필요
-      const hasEnoughPoints = processingShape.points.length >= 3;
-      // 시작 점과 끝 점이 가까워야 다각형이 완성된 것으로 판단
-      const isCloseToStart =
-        Math.abs(startX - endX) <= CLOSE_DISTANCE_THRESHOLD &&
-        Math.abs(startY - endY) <= CLOSE_DISTANCE_THRESHOLD;
+    // 도형이 미완성된 경우(열린 도형인 경우), draft만 업데이트
+    if (status === "opened") return setDraftShape(processingShape);
 
-      // 다각형이 완성되지 않은 경우, draft에 새로운 점을 추가하고 종료
-      if (!hasEnoughPoints || !isCloseToStart) {
-        return setDraftShape({
-          ...processingShape,
-          points: [...processingShape.points, [endX, endY] as const],
-        } satisfies PolygonShapeModel);
-      }
-
-      // 다각형이 완성된 경우, 끝 점은 시작 점과 동일하므로 제거
-      processingShape = {
-        ...processingShape,
-        points: processingShape.points.slice(0, -1),
-      } satisfies PolygonShapeModel;
-    }
-
-    const newShapes = [...shapes, processingShape];
+    // 도형이 완성된 경우(닫힌 도형인 경우), draft를 비우고 저장
+    setDraftShape(undefined);
+    setShapes([...shapes, processingShape]);
     setHistory({
-      // 최대 40개까지 저장
       previous: [...history.previous, processingShape].slice(-40),
-      // 새로운 기록이 추가되면 그동안 되돌렸던 기록들을 덮어씀
       next: [],
     });
-    setShapes(newShapes);
-    setDraftShape(undefined);
   };
 
-  const handleUndoClick = () => {
+  const undo = () => {
     const target = history.previous.at(-1);
     if (!target) return history;
     setHistory({
@@ -243,7 +172,7 @@ function App() {
     );
   };
 
-  const handleRedoClick = () => {
+  const redo = () => {
     const target = history.next.at(-1);
     if (!target) return history;
     setHistory({
@@ -255,7 +184,6 @@ function App() {
 
   return (
     <div className="app">
-      {/* drawing menu */}
       <div className="toolbar">
         <div className="toolbar-tools">
           <Button
@@ -327,7 +255,7 @@ function App() {
         <div className="toolbar-actions">
           <Button
             className="toolbar-button"
-            onClick={handleUndoClick}
+            onClick={() => undo()}
             disabled={history.previous.length === 0}
             aria-label="Undo"
             title="Undo"
@@ -336,7 +264,7 @@ function App() {
           </Button>
           <Button
             className="toolbar-button"
-            onClick={handleRedoClick}
+            onClick={() => redo()}
             disabled={history.next.length === 0}
             aria-label="Redo"
             title="Redo"
@@ -345,7 +273,6 @@ function App() {
           </Button>
         </div>
       </div>
-      {/* drawing canvas */}
       <div>
         <Stage
           width={window.innerWidth}
@@ -355,12 +282,47 @@ function App() {
           onMouseUp={handleMouseUp}
         >
           <Layer>
-            {shapes.map((shape) => (
-              <Shape key={shape.id} shape={shape} />
-            ))}
-            {draftShape && (
-              <Shape key={draftShape.id} shape={draftShape} draft={true} />
-            )}
+            {shapes.map((shape) => {
+              if (shape.type === "brush") {
+                return <Brush key={shape.id} shape={shape} />;
+              }
+              if (shape.type === "line") {
+                return <Line key={shape.id} shape={shape} />;
+              }
+              if (shape.type === "ellipse") {
+                return <Ellipse key={shape.id} shape={shape} />;
+              }
+              if (shape.type === "rectangle") {
+                return <Rectangle key={shape.id} shape={shape} />;
+              }
+              if (shape.type === "polygon") {
+                return <Polygon key={shape.id} shape={shape} draft={false} />;
+              }
+            })}
+            {draftShape &&
+              (() => {
+                if (draftShape.type === "brush") {
+                  return <Brush key={draftShape.id} shape={draftShape} />;
+                }
+                if (draftShape.type === "line") {
+                  return <Line key={draftShape.id} shape={draftShape} />;
+                }
+                if (draftShape.type === "ellipse") {
+                  return <Ellipse key={draftShape.id} shape={draftShape} />;
+                }
+                if (draftShape.type === "rectangle") {
+                  return <Rectangle key={draftShape.id} shape={draftShape} />;
+                }
+                if (draftShape.type === "polygon") {
+                  return (
+                    <Polygon
+                      key={draftShape.id}
+                      shape={draftShape}
+                      draft={true}
+                    />
+                  );
+                }
+              })()}
           </Layer>
         </Stage>
       </div>
