@@ -34,8 +34,17 @@ Base
   color: #646cff;
   text-decoration: inherit;
 }
+
 :where(a:hover) {
   color: #747bff;
+}
+
+:where(button:enabled) {
+  cursor: pointer;
+}
+
+:where(button:disabled) {
+  cursor: default;
 }
 
 /*
@@ -59,22 +68,25 @@ Components
   font-size: 0.875rem;
   font-weight: 600;
   transition: 0.15s;
-  transition-property: color, background-color;
-  cursor: pointer;
+  transition-property: color, background-color, opacity;
+}
+
+.button[aria-pressed="true"] {
+  color: #2e578c;
+  background-color: #dee8f4;
 }
 
 .button:focus {
   outline: none;
 }
 
-.button:hover,
-.button:focus-visible {
+.button:enabled:hover,
+.button:enabled:focus-visible {
   background-color: #f0f0f0;
 }
 
-.button[aria-pressed="true"] {
-  color: #2e578c;
-  background-color: #dee8f4;
+.button:disabled {
+  opacity: 0.5;
 }
 
 .number-field {
@@ -163,6 +175,11 @@ Components
   flex-direction: column;
   gap: 0.75rem;
   padding: 0.5em 0;
+}
+
+.toolbar-actions {
+  display: flex;
+  flex-direction: column;
 }
 
 .toolbar-separator {

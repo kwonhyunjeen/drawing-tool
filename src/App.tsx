@@ -8,6 +8,8 @@ import {
   LineIcon,
   PolygonIcon,
   RectangleIcon,
+  UndoIcon,
+  RedoIcon,
 } from "./components/ui/Icon";
 import { Button } from "./components/ui/Button";
 import { NumberField } from "./components/ui/NumberField";
@@ -43,6 +45,14 @@ function App() {
     }
   });
   const [draftShape, setDraftShape] = useState<ShapeModel>();
+
+  const [history, setHistory] = useState<{
+    previous: ShapeModel[];
+    next: ShapeModel[];
+  }>({
+    previous: [],
+    next: [],
+  });
 
   useEffect(() => {
     try {
@@ -216,9 +226,45 @@ function App() {
     }
 
     const newShapes = [...shapes, processingShape];
-    console.log("MouseUp", newShapes);
+    setHistory((previousHistory) => ({
+      // 최대 40개까지 저장
+      previous: [...previousHistory.previous, processingShape].slice(-40),
+      // 새로운 기록이 추가되면 그동안 되돌렸던 기록들을 덮어씀
+      next: [],
+    }));
+    setShapes(newShapes);
     setDraftShape(undefined);
-    return setShapes(newShapes);
+  };
+
+  const handleUndoClick = () => {
+    setHistory((previousHistory) => {
+      const target = previousHistory.previous.at(-1);
+      if (!target) return previousHistory;
+      return {
+        previous: previousHistory.previous.slice(0, -1),
+        next: [...previousHistory.next, target],
+      };
+    });
+    setShapes((previousShapes) =>
+      previousShapes.filter(
+        (shape) => shape.id !== history.previous.at(-1)?.id,
+      ),
+    );
+  };
+
+  const handleRedoClick = () => {
+    setHistory((previousHistory) => {
+      const target = previousHistory.next.at(-1);
+      if (!target) return previousHistory;
+      return {
+        previous: [...previousHistory.previous, target],
+        next: previousHistory.next.slice(0, -1),
+      };
+    });
+    setShapes((previousShapes) => [
+      ...previousShapes,
+      history.next.at(-1) as ShapeModel,
+    ]);
   };
 
   return (
@@ -290,6 +336,27 @@ function App() {
             aria-label="Stroke color"
             title="Stroke color"
           />
+        </div>
+        <div className="toolbar-separator" />
+        <div className="toolbar-actions">
+          <Button
+            className="toolbar-button"
+            onClick={handleUndoClick}
+            disabled={history.previous.length === 0}
+            aria-label="Undo"
+            title="Undo"
+          >
+            <UndoIcon />
+          </Button>
+          <Button
+            className="toolbar-button"
+            onClick={handleRedoClick}
+            disabled={history.next.length === 0}
+            aria-label="Redo"
+            title="Redo"
+          >
+            <RedoIcon />
+          </Button>
         </div>
       </div>
       {/* drawing canvas */}
